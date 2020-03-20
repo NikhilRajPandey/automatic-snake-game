@@ -1,11 +1,5 @@
 # snake-game
-I have fix the error please use update-game.py 
 
+This is a simple python automatic game snake game.
 
-it have many cheat code like
-
-pressing "b" = snake-size will gets low
-
-pressing "LCTRL" = snake-size will get high
-
-pressing "K_RCTRL" = length will increase and score also
+Open the update-game.py and see the snake moving around.
