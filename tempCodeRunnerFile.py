@@ -1,6 +1,5 @@
 import pygame
 import random
-import math
 # main game
 def loop():
     pygame.init()
@@ -15,14 +14,14 @@ def loop():
     red = (255,0,0)
     blue = (51, 51, 255)
     # Spesfic variables
-    x = 40
-    y = 50
+    x = 45
+    y = 55
     h = 30
-    f_x = math.ceil(random.randint(20,1100) / 10) * 10
-    f_y = math.ceil(random.randint(20,700) / 10) * 10
+    f_x = random.randint(20,885)
+    f_y = random.randint(20,485)
     velocity_x = 0
     velocity_y = 0
-    fps = 45
+    fps = 30
     clock = pygame.time.Clock()
     snk_l = []
     snk_le = 1
@@ -34,31 +33,32 @@ def loop():
     bg = pygame.image.load("back.jpg")
     bg2 = pygame.image.load("over.jpg")
     while not ex:
+        score = len(snk_l) * 5
+
         if gameover == True:
+            game.fill(white)
             game.blit(bg2,(0,0))
             fontover = pygame.font.SysFont(None,105)
-            fontover2 = pygame.font.SysFont(None,80)
+            fontover2 = pygame.font.SysFont(None,75)
             text = fontover2.render("Game over Enter to play this game", True, bl)
-            game.blit(text, [120, 110])
+            game.blit(text, [10, 50])
             note = fontover.render("Score:"+str(score),True, blue)
-            game.blit(note,[370,180])
+            game.blit(note,[250,150])
             pygame.display.update()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
+                    ex = True
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         loop()
         else:
-            score = len(snk_l) * 5
+            game.fill(white)
             game.blit(bg,(0,0))
             txt = font.render("Score:"+str(score), True, bl)
             game.blit(txt, [5, 5])
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
+                    ex = True
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RIGHT:
                         velocity_x = 10
@@ -80,10 +80,10 @@ def loop():
                     if event.key == pygame.K_LCTRL:
                         h = 30
                         fps = 30
-            if abs(x - f_x)<15 and abs(y - f_y)<15:
+            if abs(x - f_x)<8 and abs(y - f_y)<8:
                 snk_le = snk_le + 5
-                f_x = math.ceil(random.randint(20,1100) / 10) * 10
-                f_y = math.ceil(random.randint(20,700) / 10) * 10
+                f_x = random.randint(20, screen_width / 2)
+                f_y = random.randint(20, screen_height / 2)
             if x<0 or y<0 or x>screen_width or y>screen_height:
                 gameover = True
             head = []
