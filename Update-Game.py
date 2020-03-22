@@ -26,6 +26,7 @@ def loop():
     clock = pygame.time.Clock()
     snk_l = []
     snk_le = 1
+    current_axis = 0
     font = pygame.font.SysFont(None,55)
     # stoping from exiting
     def plot():
@@ -80,6 +81,23 @@ def loop():
                     if event.key == pygame.K_LCTRL:
                         h = 30
                         fps = 30
+
+            # Automation Code is here
+            if f_x != x:
+                if f_x - x > 0 :
+                    velocity_x = 10
+                    velocity_y = 0
+                else:
+                    velocity_x = -10
+                    velocity_y = 0
+            else:
+                if f_y - y > 0:
+                    velocity_y = 10
+                    velocity_x = 0
+                else:
+                    velocity_y = -10
+                    velocity_x = 0
+
             if abs(x - f_x)<15 and abs(y - f_y)<15:
                 snk_le = snk_le + 5
                 f_x = math.ceil(random.randint(20,1100) / 10) * 10
