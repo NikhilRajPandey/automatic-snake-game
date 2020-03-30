@@ -90,6 +90,7 @@ def will_it_collid(direction,snk_l):
     part_coll = part_collid(direction,snk_l)
     wall_coll = wall_collid(direction,snk_l)
     if part_coll != False:
+        part_coll = int(part_coll)
         if part_coll < 2: # Here i write two it means i have to maintain at least 20 pixel distance
             part_coll = True
         else:
@@ -122,9 +123,9 @@ def loop():
     f_y = math.ceil(random.randint(20,700) / 10) * 10
     velocity_x = 10
     velocity_y = 0
+    snk_l = []
     fps = 45
     clock = pygame.time.Clock()
-    snk_l = []
     snk_le = 1
     current_direction = 1
     font = pygame.font.SysFont(None,55)
@@ -152,7 +153,7 @@ def loop():
         else:
             score = len(snk_l) * 5
             game.blit(bg,(0,0))
-            food = pygame.draw.rect(game, red, [f_x, f_y, h, h])
+            pygame.draw.rect(game, red, [f_x, f_y, h, h])
             txt = font.render("Score:"+str(score), True, bl)
             game.blit(txt, [5, 5])
             for event in pygame.event.get():
@@ -186,73 +187,101 @@ def loop():
             snk_l.append(head)
             plot()
             # Automation Code Start Here
-            # Basic Work for eating food
-            eat_food_or_not = True
-            """This func will tell us that snake is going to 
-                collid with himself or walls or not"""
-            print(part_collid(current_direction,snk_l))
-            checking_collidation = will_it_collid(current_direction,snk_l)
-            print("colidation",checking_collidation)
-            if checking_collidation:
-                eat_food_or_not = False
-                print("eat",eat_food_or_not)
-                
-                if current_direction == 1 or current_direction == 2: # West and East
-                    if not will_it_collid(3,snk_l): # These lines are for taking turns
-                        current_direction = 3
-                        velocity_y = -10
-                        velocity_x = 0
-                    elif not will_it_collid(4,snk_l):
-                        current_direction = 4
-                        velocity_y = 10
-                        velocity_x = 0
+            def work_when_collid(current_direction,snk_l):
+                checking_collidation = will_it_collid(current_direction,snk_l)
+                if checking_collidation:
+                    if current_direction == 1 or current_direction == 2: # West and East
+                        if not will_it_collid(3,snk_l): # These lines are for taking turns if something come in snake way
+                            current_direction = 3
+                            velocity_y = -10
+                            velocity_x = 0
+                        elif not will_it_collid(4,snk_l):
+                            current_direction = 4
+                            velocity_y = 10
+                            velocity_x = 0
 
-                if current_direction == 3 or current_direction == 4: # North
-                    if not will_it_collid(1,snk_l):
-                        current_direction = 1 # East
-                        velocity_x = 10
-                        velocity_y = 0
-                    elif not will_it_collid(2,snk_l):
-                        current_direction = 2 # West
-                        velocity_x = -10
-                        velocity_y = 0
-
-            if eat_food_or_not: # Means i am safe to eat food
-                focus_on_y_axis = False
-                if f_x != x:
-                    # Think if this is not writen then it will collid in himself
-                    if f_x - x > 0 and current_direction == 2: 
-                        focus_on_y_axis = True
-                    elif f_x - x < 0 and current_direction == 1:
-                        focus_on_y_axis = True
-                    if f_x - x > 0 :
-                        if current_direction != 1 and not will_it_collid(1,snk_l):
+                    if current_direction == 3 or current_direction == 4: # North
+                        if not will_it_collid(1,snk_l):
                             current_direction = 1 # East
                             velocity_x = 10
                             velocity_y = 0
-                    else:
-                        if current_direction != 2 and not will_it_collid(2,snk_l):
+                        elif not will_it_collid(2,snk_l):
                             current_direction = 2 # West
                             velocity_x = -10
                             velocity_y = 0
-                if focus_on_y_axis or f_x == x:
-                    if f_y - y > 0:
-                        if current_direction != 4 and not will_it_collid(4,snk_l):
-                            current_direction = 4 # South
-                            velocity_y = 10
-                            velocity_x = 0
+                    return [current_direction,velocity_x,velocity_y]
+                else:
+                    return False # Means I have to do nothing
+
+            # Basic Work for eating food
+            focus_on_y_axis = False
+            if f_x != x or f_y == y:
+                # Think if this is not writen then it will collid in himself
+                if f_x - x > 0 and current_direction == 2: 
+                    focus_on_y_axis = True
+                elif f_x - x < 0 and current_direction == 1:
+                    focus_on_y_axis = True
+                if f_x - x > 0 :
+                    if current_direction != 1 and not will_it_collid(1,snk_l):
+                        current_direction = 1 # East
+                        velocity_x = 10
+                        velocity_y = 0
                     else:
-                        if current_direction != 3 and not will_it_collid(3,snk_l):
-                            current_direction = 3 # North
-                            velocity_y = -10
-                            velocity_x = 0
+                        motion_vars = work_when_collid(current_direction,snk_l)
+                        if motion_vars != False:
+                            current_direction = motion_vars[0]
+                            velocity_x = motion_vars[1]
+                            velocity_y = motion_vars[2]
+                else:
+                    if current_direction != 2 and not will_it_collid(2,snk_l):
+                        current_direction = 2 # West
+                        velocity_x = -10
+                        velocity_y = 0
+                    else:
+                        motion_vars = work_when_collid(current_direction,snk_l)
+                        if motion_vars != False:
+                            current_direction = motion_vars[0]
+                            velocity_x = motion_vars[1]
+                            velocity_y = motion_vars[2]
+            if focus_on_y_axis or f_x == x:
+                if f_y - y > 0:
+                    if current_direction != 4 and not will_it_collid(4,snk_l):
+                        current_direction = 4 # South
+                        velocity_y = 10
+                        velocity_x = 0
+                    else:
+                        motion_vars = work_when_collid(current_direction,snk_l)
+                        if motion_vars != False:
+                            current_direction = motion_vars[0]
+                            velocity_x = motion_vars[1]
+                            velocity_y = motion_vars[2]
+                else:
+                    if current_direction != 3 and not will_it_collid(3,snk_l):
+                        current_direction = 3 # North
+                        velocity_y = -10
+                        velocity_x = 0
+                    else:
+                        motion_vars = work_when_collid(current_direction,snk_l)
+                        if motion_vars != False:
+                            current_direction = motion_vars[0]
+                            velocity_x = motion_vars[1]
+                            velocity_y = motion_vars[2]
             if len(snk_l)>snk_le:
                 del snk_l[0]
                 
             if abs(x - f_x)<15 and abs(y - f_y)<15:
                 snk_le = snk_le + 5
+                # mouse_button_clicked = False
                 f_x = math.ceil(random.randint(20,1100) / 10) * 10
                 f_y = math.ceil(random.randint(20,700) / 10) * 10
+                # For Debuging Purpose
+                # while not mouse_button_clicked:
+                #     for event in pygame.event.get():
+                #         if event.type == pygame.MOUSEBUTTONDOWN:
+                #             posx,posy = pygame.mouse.get_pos()
+                #             f_x = math.ceil(posx / 10) * 10
+                #             f_y = math.ceil(posy / 10) * 10
+                #             mouse_button_clicked = True
             if x<0 or y<0 or x>screen_width or y>screen_height:
                 gameover = True
             if head in snk_l[:-2]:
