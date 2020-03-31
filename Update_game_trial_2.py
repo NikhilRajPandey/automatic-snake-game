@@ -20,11 +20,11 @@ def wall_collid(direction,snk_l):
         if (screen_height - head[1])  <= 20:
             return True
     return False
-def part_collid(direction,snk_l):
+def part_collid(direction,snk_l,food):
     head = snk_l[-1]
     snk_l = snk_l[:-1]
     can_collid_parts = []
-    if direction == 1:
+    if direction == 1: # East
         for index,part in enumerate(snk_l):
             if part[1] == head[1] and part[0] > head[0]: # Adding those parts that can collid
                 can_collid_parts.append([index,part])
@@ -38,8 +38,10 @@ def part_collid(direction,snk_l):
                 collid_parts_x_index.append(item[0])
             nearest_part = min(collid_parts_x)
             nearest_part_index = collid_parts_x_index[collid_parts_x.index(nearest_part)]
+            if food[0] < nearest_part and food[1] == snk_l[nearest_part_index][1]: # Means I will eat the food before collidation
+                return False
             return (((nearest_part - head[0]) / 10 ) - (nearest_part_index))
-    elif direction == 2:
+    elif direction == 2: # West
         for index,part in enumerate(snk_l):
             if part[1] == head[1] and part[0] < head[0]:
                 can_collid_parts.append([index,part])
@@ -53,6 +55,8 @@ def part_collid(direction,snk_l):
                 collid_parts_x_index.append(item[0])
             nearest_part = max(collid_parts_x)
             nearest_part_index = collid_parts_x_index[collid_parts_x.index(nearest_part)]
+            if food[0] > nearest_part and food[1] == snk_l[nearest_part_index][1]:
+                return False
             return (((head[0] - nearest_part) / 10 ) - (nearest_part_index))
     elif direction == 3: # North
         for index,part in enumerate(snk_l):
@@ -68,6 +72,8 @@ def part_collid(direction,snk_l):
                 collid_parts_y_index.append(item[0])
             nearest_part = max(collid_parts_y)
             nearest_part_index = collid_parts_y_index[collid_parts_y.index(nearest_part)]
+            if food[1] > nearest_part and food[0] == snk_l[nearest_part_index][0]:
+                return False
             return (((head[1] - nearest_part) / 10 ) - (nearest_part_index))
     elif direction == 4: # South
         for index,part in enumerate(snk_l):
@@ -83,15 +89,17 @@ def part_collid(direction,snk_l):
                 collid_parts_y_index.append(item[0])
             nearest_part = min(collid_parts_y)
             nearest_part_index = collid_parts_y_index[collid_parts_y.index(nearest_part)]
+            if food[1] < nearest_part and food[0] == snk_l[nearest_part_index][0]:
+                return False
             return (((nearest_part - head[1]) / 10 ) - (nearest_part_index))
             # This will return at which moment it will collide because the part is also moving
 
-def will_it_collid(direction,snk_l):
-    part_coll = part_collid(direction,snk_l)
+def will_it_collid(direction,snk_l,food):
+    part_coll = part_collid(direction,snk_l,food)
     wall_coll = wall_collid(direction,snk_l)
-    if part_coll != False:
+    if part_coll is not False:
         part_coll = int(part_coll)
-        if part_coll < 2: # Here i write two it means i have to maintain at least 20 pixel distance
+        if part_coll < 2: # Here i write two it means i have to maintain at least 10 pixel distance
             part_coll = True
         else:
             part_coll = False
@@ -152,6 +160,7 @@ def loop():
                         loop()
         else:
             score = len(snk_l) * 5
+            food = [f_x,f_y]
             game.blit(bg,(0,0))
             pygame.draw.rect(game, red, [f_x, f_y, h, h])
             txt = font.render("Score:"+str(score), True, bl)
@@ -187,81 +196,104 @@ def loop():
             snk_l.append(head)
             plot()
             # Automation Code Start Here
-            def work_when_collid(current_direction,snk_l):
-                checking_collidation = will_it_collid(current_direction,snk_l)
+            def work_when_collid(current_direction,snk_l,food):
+                checking_collidation = will_it_collid(current_direction,snk_l,food)
+                direction = current_direction
                 if checking_collidation:
                     if current_direction == 1 or current_direction == 2: # West and East
-                        if not will_it_collid(3,snk_l): # These lines are for taking turns if something come in snake way
-                            current_direction = 3
+                        if not will_it_collid(3,snk_l,food): # These lines are for taking turns if something come in snake way
+                            direction = 3
                             velocity_y = -10
                             velocity_x = 0
-                        elif not will_it_collid(4,snk_l):
-                            current_direction = 4
+                        else:
+                            direction = 4
                             velocity_y = 10
                             velocity_x = 0
 
                     if current_direction == 3 or current_direction == 4: # North
-                        if not will_it_collid(1,snk_l):
-                            current_direction = 1 # East
+                        if not will_it_collid(1,snk_l,food):
+                            direction = 1 # East
                             velocity_x = 10
                             velocity_y = 0
-                        elif not will_it_collid(2,snk_l):
-                            current_direction = 2 # West
+                        else:
+                            direction = 2 # West
                             velocity_x = -10
                             velocity_y = 0
-                    return [current_direction,velocity_x,velocity_y]
+                    return [direction,velocity_x,velocity_y]
                 else:
                     return False # Means I have to do nothing
 
             # Basic Work for eating food
             focus_on_y_axis = False
+            print("f_y",f_y,y)
+            print("f_x",f_x,x)
             if f_x != x or f_y == y:
                 # Think if this is not writen then it will collid in himself
                 if f_x - x > 0 and current_direction == 2: 
                     focus_on_y_axis = True
                 elif f_x - x < 0 and current_direction == 1:
                     focus_on_y_axis = True
-                if f_x - x > 0 :
-                    if current_direction != 1 and not will_it_collid(1,snk_l):
-                        current_direction = 1 # East
-                        velocity_x = 10
-                        velocity_y = 0
+                elif f_x == x:
+                    focus_on_y_axis = True
+                if not focus_on_y_axis:
+                    if f_x - x > 0 :
+                        direction_check = will_it_collid(1,snk_l,food)
+                        print("direction_check 1",direction_check)
+                        print("current Direction", current_direction)
+                        if current_direction != 1 and not direction_check:
+                            print("Successful 1")
+                            current_direction = 1 # East
+                            velocity_x = 10
+                            velocity_y = 0
+                        else:
+                            motion_vars = work_when_collid(current_direction,snk_l,food)
+                            if motion_vars != False:
+                                current_direction = motion_vars[0]
+                                velocity_x = motion_vars[1]
+                                velocity_y = motion_vars[2]
                     else:
-                        motion_vars = work_when_collid(current_direction,snk_l)
-                        if motion_vars != False:
-                            current_direction = motion_vars[0]
-                            velocity_x = motion_vars[1]
-                            velocity_y = motion_vars[2]
-                else:
-                    if current_direction != 2 and not will_it_collid(2,snk_l):
-                        current_direction = 2 # West
-                        velocity_x = -10
-                        velocity_y = 0
-                    else:
-                        motion_vars = work_when_collid(current_direction,snk_l)
-                        if motion_vars != False:
-                            current_direction = motion_vars[0]
-                            velocity_x = motion_vars[1]
-                            velocity_y = motion_vars[2]
+                        direction_check = will_it_collid(2,snk_l,food)
+                        print("direction_check 2",direction_check)
+                        print("current Direction", current_direction)
+                        if current_direction != 2 and not direction_check:
+                            print("Successful 2")
+                            current_direction = 2 # West
+                            velocity_x = -10
+                            velocity_y = 0
+                        else:
+                            motion_vars = work_when_collid(current_direction,snk_l,food)
+                            # If False Then i have to do nothing
+                            if motion_vars != False:
+                                current_direction = motion_vars[0]
+                                velocity_x = motion_vars[1]
+                                velocity_y = motion_vars[2]
             if focus_on_y_axis or f_x == x:
                 if f_y - y > 0:
-                    if current_direction != 4 and not will_it_collid(4,snk_l):
+                    direction_check = will_it_collid(4,snk_l,food)
+                    print("direction_check 4",direction_check)
+                    print("current Direction", current_direction)
+                    if current_direction != 4 and not direction_check:
+                        print("Successful 4")
                         current_direction = 4 # South
                         velocity_y = 10
                         velocity_x = 0
                     else:
-                        motion_vars = work_when_collid(current_direction,snk_l)
+                        motion_vars = work_when_collid(current_direction,snk_l,food)
                         if motion_vars != False:
                             current_direction = motion_vars[0]
                             velocity_x = motion_vars[1]
                             velocity_y = motion_vars[2]
                 else:
-                    if current_direction != 3 and not will_it_collid(3,snk_l):
+                    direction_check = will_it_collid(3,snk_l,food)
+                    print("direction_check 3",direction_check)
+                    print("current Direction", current_direction)
+                    if current_direction != 3 and not direction_check:
+                        print("Successful 3")
                         current_direction = 3 # North
                         velocity_y = -10
                         velocity_x = 0
                     else:
-                        motion_vars = work_when_collid(current_direction,snk_l)
+                        motion_vars = work_when_collid(current_direction,snk_l,food)
                         if motion_vars != False:
                             current_direction = motion_vars[0]
                             velocity_x = motion_vars[1]
