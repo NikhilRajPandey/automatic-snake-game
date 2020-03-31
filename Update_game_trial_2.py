@@ -169,27 +169,6 @@ def loop():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RIGHT:
-                        velocity_x = 10
-                        velocity_y = 0
-                    if event.key == pygame.K_LEFT:
-                        velocity_x = -10
-                        velocity_y = 0
-                    if event.key == pygame.K_DOWN:
-                        velocity_y = 10
-                        velocity_x = 0
-                    if event.key == pygame.K_UP:
-                        velocity_y = -10
-                        velocity_x = 0
-                    if event.key == pygame.K_RCTRL:
-                        snk_le = snk_le + 10
-                    if event.key == pygame.K_b:
-                        h = 10
-                        fps = 25
-                    if event.key == pygame.K_LCTRL:
-                        h = 30
-                        fps = 30
             head = []
             head.append(x)
             head.append(y)
@@ -225,8 +204,6 @@ def loop():
 
             # Basic Work for eating food
             focus_on_y_axis = False
-            print("f_y",f_y,y)
-            print("f_x",f_x,x)
             if f_x != x or f_y == y:
                 # Think if this is not writen then it will collid in himself
                 if f_x - x > 0 and current_direction == 2: 
@@ -238,10 +215,7 @@ def loop():
                 if not focus_on_y_axis:
                     if f_x - x > 0 :
                         direction_check = will_it_collid(1,snk_l,food)
-                        print("direction_check 1",direction_check)
-                        print("current Direction", current_direction)
                         if current_direction != 1 and not direction_check:
-                            print("Successful 1")
                             current_direction = 1 # East
                             velocity_x = 10
                             velocity_y = 0
@@ -253,10 +227,7 @@ def loop():
                                 velocity_y = motion_vars[2]
                     else:
                         direction_check = will_it_collid(2,snk_l,food)
-                        print("direction_check 2",direction_check)
-                        print("current Direction", current_direction)
                         if current_direction != 2 and not direction_check:
-                            print("Successful 2")
                             current_direction = 2 # West
                             velocity_x = -10
                             velocity_y = 0
@@ -270,10 +241,7 @@ def loop():
             if focus_on_y_axis or f_x == x:
                 if f_y - y > 0:
                     direction_check = will_it_collid(4,snk_l,food)
-                    print("direction_check 4",direction_check)
-                    print("current Direction", current_direction)
                     if current_direction != 4 and not direction_check:
-                        print("Successful 4")
                         current_direction = 4 # South
                         velocity_y = 10
                         velocity_x = 0
@@ -285,10 +253,7 @@ def loop():
                             velocity_y = motion_vars[2]
                 else:
                     direction_check = will_it_collid(3,snk_l,food)
-                    print("direction_check 3",direction_check)
-                    print("current Direction", current_direction)
                     if current_direction != 3 and not direction_check:
-                        print("Successful 3")
                         current_direction = 3 # North
                         velocity_y = -10
                         velocity_x = 0
