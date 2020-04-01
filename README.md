@@ -2,7 +2,7 @@
 
 This is a simple python automatic game snake game.
 
-Open the trial update-game.py and see the snake moving around.<br>
+Open the trial-update-game-2.py and see the snake moving around.<br>
 Photo 1 : https://www.pexels.com/photo/blue-sky-blur-clear-sky-color-281260/<br>
 Photo 2: https://www.pexels.com/photo/contemporary-gradient-handrails-perspective-434645/
 
